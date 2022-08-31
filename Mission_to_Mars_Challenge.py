@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup as soup
 import pandas as pd
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
+import datetime as dt
 
 
 
@@ -19,16 +20,16 @@ def scrape_all():
 # Set the executable path and initialize Splinter
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser('chrome', **executable_path, headless=False)
-
+    title, paragraph = news_title(browser)
     data = {
-      "news_title": news_title,
-      #"news_paragraph": mars_news,
-      "featured_image": featured_image(browser),
-      "facts": mars_facts(),
-      #"last_modified": dt.datetime.now()
-      "hemispheres": images(browser)
+       "news_title": title,
+        "news_paragraph": paragraph,
+        "featured_image": featured_image(browser),
+        "facts": mars_facts(),
+        "last_modified": dt.datetime.now(),
+       "hemispheres": images(browser)
     }
-      
+    print(data)   
     return data
 # ### Visit the NASA Mars News Site
 
@@ -172,7 +173,7 @@ def images(browser):
     html = browser.html
     img_soup = soup(html, 'html.parser')
     hemispheres = img_soup.find_all("div", class_="item")
-
+    
     for hemisphere in hemispheres:
         try:
             img_url = hemisphere.find("a").get("href")
@@ -187,14 +188,16 @@ def images(browser):
             # print(full_img)
             
             img_url_scrape = url + full_img
-            Hemisphere_url_title = {"Image Url": img_url_scrape, "Title": title}
+            Hemisphere_url_title = {"img_url": img_url_scrape, "title": title}
 
             
 
             hemisphere_image_urls.append(Hemisphere_url_title)
         except AttributeError:
             return None
+
         browser.back()
+    return hemisphere_image_urls
         
 
 if __name__ == "__main__":
